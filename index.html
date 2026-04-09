@@ -1,0 +1,1725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Training For Your Agents — Connor MacIvor | ConnorWithHonor.com</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #080c10;
+    --deep: #0d1219;
+    --panel: #111820;
+    --border: #1e2d3d;
+    --cyan: #00e5ff;
+    --cyan-dim: rgba(0,229,255,0.15);
+    --cyan-glow: rgba(0,229,255,0.4);
+    --gold: #f0b429;
+    --gold-dim: rgba(240,180,41,0.15);
+    --red: #ff3355;
+    --red-dim: rgba(255,51,85,0.12);
+    --red-glow: rgba(255,51,85,0.35);
+    --white: #e8eef4;
+    --muted: #6b7f8f;
+    --text: #c4d4e0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 17px;
+    line-height: 1.65;
+    overflow-x: hidden;
+  }
+
+  /* GRID BACKGROUND */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* TICKER */
+  .ticker-wrap {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: var(--black);
+    border-bottom: 1px solid var(--red);
+    height: 36px;
+    overflow: hidden;
+  }
+  .ticker-track {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    white-space: nowrap;
+    animation: ticker 30s linear infinite;
+  }
+  .ticker-item {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--cyan);
+    letter-spacing: 0.08em;
+    padding: 0 48px;
+  }
+  .ticker-item span { color: var(--gold); margin-right: 8px; }
+  .ticker-item.red { color: var(--text); }
+  .ticker-item.red span { color: var(--red); }
+  @keyframes ticker {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 36px;
+    left: 0;
+    right: 0;
+    z-index: 99;
+    background: rgba(8,12,16,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.12em;
+    color: var(--white);
+  }
+  .nav-logo .red { color: var(--red); }
+  .nav-logo .cyan { color: var(--cyan); }
+  .nav-cta {
+    background: var(--red);
+    color: var(--white);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 9px 22px;
+    text-decoration: none;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+    transition: all 0.2s;
+    box-shadow: 0 0 16px var(--red-glow);
+  }
+  .nav-cta:hover { background: var(--gold); color: var(--black); transform: translateY(-1px); box-shadow: 0 0 20px rgba(240,180,41,0.4); }
+
+  /* HERO */
+  .hero {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 140px 40px 80px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .hero-content { max-width: 680px; }
+  .hero-eyebrow {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--cyan);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    display: block;
+    width: 32px;
+    height: 1px;
+    background: var(--cyan);
+  }
+  .hero h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(54px, 8vw, 96px);
+    line-height: 0.95;
+    letter-spacing: 0.02em;
+    color: var(--white);
+    margin-bottom: 28px;
+  }
+  .hero h1 .accent { color: var(--cyan); }
+  .hero h1 .gold { color: var(--gold); }
+  .hero-sub {
+    font-size: 19px;
+    font-weight: 300;
+    color: var(--text);
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+  .hero-sub strong { color: var(--white); font-weight: 600; }
+  .hero-truth {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--gold);
+    letter-spacing: 0.05em;
+    margin-bottom: 40px;
+    padding-left: 16px;
+    border-left: 3px solid var(--gold);
+  }
+  .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+  .btn-primary {
+    background: var(--cyan);
+    color: var(--black);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 16px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 16px 36px;
+    text-decoration: none;
+    clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+    transition: all 0.25s;
+    display: inline-block;
+  }
+  .btn-primary:hover {
+    background: var(--gold);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(240,180,41,0.3);
+  }
+  .btn-secondary {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    padding: 15px 30px;
+    transition: all 0.25s;
+  }
+  .btn-secondary:hover { border-color: var(--cyan); background: var(--cyan-dim); }
+
+  .hero-visual {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 420px;
+    opacity: 0.08;
+    pointer-events: none;
+  }
+
+  /* PROOF BAR */
+  .proof-bar {
+    position: relative;
+    z-index: 1;
+    background: var(--panel);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 28px 40px;
+  }
+  .proof-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    gap: 48px;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+  }
+  .proof-stat {
+    text-align: center;
+  }
+  .proof-stat .num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 42px;
+    color: var(--cyan);
+    line-height: 1;
+    letter-spacing: 0.05em;
+  }
+  .proof-stat .label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .proof-divider {
+    width: 1px;
+    height: 50px;
+    background: var(--border);
+  }
+
+  /* SECTION BASE */
+  section {
+    position: relative;
+    z-index: 1;
+    padding: 100px 40px;
+  }
+  .section-inner { max-width: 1200px; margin: 0 auto; }
+  .section-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--cyan);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-label::before {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 1px;
+    background: var(--cyan);
+  }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 5vw, 64px);
+    letter-spacing: 0.03em;
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 24px;
+  }
+  .section-title .accent { color: var(--cyan); }
+  .section-title .gold { color: var(--gold); }
+
+  /* THE PROBLEM */
+  .problem-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    margin-top: 56px;
+  }
+  .problem-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 36px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .problem-card:nth-child(odd):hover  { border-color: var(--red);  box-shadow: inset 0 0 30px var(--red-dim),  0 0 20px var(--red-dim); }
+  .problem-card:nth-child(even):hover { border-color: var(--cyan); box-shadow: inset 0 0 30px var(--cyan-dim), 0 0 20px var(--cyan-dim); }
+  .problem-card:nth-child(odd)  { border-top: 2px solid var(--red); }
+  .problem-card:nth-child(even) { border-top: 2px solid var(--cyan); }
+  .problem-card .icon {
+    font-size: 32px;
+    margin-bottom: 16px;
+  }
+  .problem-card h3 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--white);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+  }
+  .problem-card p { color: var(--text); font-size: 16px; }
+
+  /* THE SOLUTION */
+  .solution-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: center;
+    margin-top: 56px;
+  }
+  .solution-text p {
+    color: var(--text);
+    font-size: 17px;
+    margin-bottom: 20px;
+  }
+  .solution-text p strong { color: var(--white); }
+  .solution-highlight {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--cyan);
+    padding: 24px 28px;
+    margin-top: 32px;
+  }
+  .solution-highlight p {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--white);
+    margin: 0;
+    line-height: 1.4;
+  }
+  .solution-highlight p em { color: var(--cyan); font-style: normal; }
+
+  /* HOW IT WORKS */
+  .steps {
+    margin-top: 64px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .step {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 32px;
+    align-items: start;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 32px 36px;
+    transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+  }
+  .step:nth-child(odd):hover  { border-color: var(--cyan); transform: translateX(4px); box-shadow: -4px 0 20px var(--cyan-dim); }
+  .step:nth-child(even):hover { border-color: var(--red);  transform: translateX(4px); box-shadow: -4px 0 20px var(--red-dim);  }
+  .step:nth-child(odd)  .step-num { color: var(--cyan); }
+  .step:nth-child(even) .step-num { color: var(--red); }
+  .step-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 56px;
+    opacity: 0.5;
+    line-height: 1;
+    letter-spacing: 0.05em;
+  }
+  .step-content h3 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--white);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .step-content p { color: var(--text); font-size: 16px; }
+  .step-content .tag {
+    display: inline-block;
+    margin-top: 12px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+    background: var(--gold-dim);
+    border: 1px solid rgba(240,180,41,0.3);
+    padding: 4px 10px;
+  }
+
+  /* WHAT AGENTS GET */
+  .topics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 56px;
+  }
+  .topic-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 28px;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .topic-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--cyan);
+    transform: scaleX(0);
+    transition: transform 0.3s;
+    transform-origin: left;
+  }
+  .topic-card:nth-child(even)::before { background: var(--red); }
+  .topic-card:hover::before { transform: scaleX(1); }
+  .topic-card:nth-child(odd):hover  { border-color: rgba(0,229,255,0.3); }
+  .topic-card:nth-child(even):hover { border-color: rgba(255,51,85,0.3); }
+  .topic-num {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--cyan);
+    margin-bottom: 12px;
+    opacity: 0.6;
+  }
+  .topic-card:nth-child(even) .topic-num { color: var(--red); }
+  .topic-card h4 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--white);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .topic-card p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+  /* FORMATS */
+  .formats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 48px;
+  }
+  .format-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 32px;
+    text-align: center;
+    transition: all 0.3s;
+  }
+  .format-card:hover {
+    border-color: var(--gold);
+    background: var(--gold-dim);
+  }
+  .format-icon { font-size: 36px; margin-bottom: 16px; }
+  .format-card h3 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--white);
+    margin-bottom: 10px;
+  }
+  .format-card p { font-size: 14px; color: var(--muted); }
+
+  /* ABOUT CONNOR */
+  .about-layout {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 64px;
+    align-items: start;
+    margin-top: 56px;
+  }
+  .about-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 36px;
+    position: sticky;
+    top: 100px;
+  }
+  .about-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    letter-spacing: 0.08em;
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .about-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 20px;
+  }
+  .about-badge {
+    display: block;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    padding: 8px 0;
+    border-top: 1px solid var(--border);
+    letter-spacing: 0.05em;
+  }
+  .about-contact {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  .about-contact a {
+    display: block;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--cyan);
+    text-decoration: none;
+    letter-spacing: 0.06em;
+    margin-bottom: 6px;
+    transition: color 0.2s;
+  }
+  .about-contact a:hover { color: var(--gold); }
+  .about-text p {
+    font-size: 17px;
+    color: var(--text);
+    margin-bottom: 20px;
+    line-height: 1.7;
+  }
+  .about-text p strong { color: var(--white); }
+  .cred-list {
+    list-style: none;
+    margin-top: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .cred-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    font-size: 16px;
+    color: var(--text);
+  }
+  .cred-list li::before {
+    content: '▸';
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .cred-list li:nth-child(odd)::before  { color: var(--cyan); }
+  .cred-list li:nth-child(even)::before { color: var(--red); }
+
+  /* THE DEAL */
+  .deal-box {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-top: 4px solid var(--red);
+    box-shadow: 0 0 60px var(--red-dim), inset 0 0 40px rgba(255,51,85,0.03);
+    padding: 56px;
+    text-align: center;
+    max-width: 800px;
+    margin: 56px auto 0;
+  }
+  .deal-price {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 96px;
+    color: var(--red);
+    line-height: 1;
+    letter-spacing: 0.05em;
+    text-shadow: 0 0 40px var(--red-glow);
+  }
+  .deal-price span {
+    font-size: 40px;
+    color: var(--muted);
+    text-decoration: line-through;
+  }
+  .deal-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 24px;
+  }
+  .deal-text {
+    font-size: 18px;
+    color: var(--text);
+    max-width: 560px;
+    margin: 0 auto 36px;
+    line-height: 1.7;
+  }
+  .deal-text strong { color: var(--white); }
+  .deal-includes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 40px;
+  }
+  .deal-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--cyan);
+    background: var(--cyan-dim);
+    border: 1px solid rgba(0,229,255,0.2);
+    padding: 6px 14px;
+  }
+
+  /* CTA SECTION */
+  .cta-section {
+    background: var(--panel);
+    border-top: 3px solid var(--red);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 -20px 60px var(--red-dim);
+  }
+  .cta-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 100px 40px;
+  }
+  .cta-inner h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(42px, 6vw, 72px);
+    letter-spacing: 0.03em;
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 20px;
+  }
+  .cta-inner h2 .accent { color: var(--cyan); }
+  .cta-inner p {
+    font-size: 18px;
+    color: var(--text);
+    margin-bottom: 40px;
+    max-width: 580px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.7;
+  }
+  .cta-phone {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    display: block;
+    margin-bottom: 8px;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .cta-phone:hover { color: var(--cyan); }
+  .cta-email {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    display: block;
+    text-decoration: none;
+    margin-bottom: 40px;
+    transition: color 0.2s;
+  }
+  .cta-email:hover { color: var(--cyan); }
+
+  /* FOOTER */
+  footer {
+    position: relative;
+    z-index: 1;
+    background: var(--black);
+    border-top: 2px solid var(--red);
+    box-shadow: 0 -8px 30px var(--red-dim);
+    padding: 28px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .footer-left {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+  .footer-right {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+  .footer-right a {
+    color: var(--cyan);
+    text-decoration: none;
+  }
+  .footer-right a:hover { color: var(--gold); }
+
+  /* ANIMATIONS */
+  .fade-up {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .fade-up.animate {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  .fade-up.animate.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .fade-up-delay-1 { transition-delay: 0.1s; }
+  .fade-up-delay-2 { transition-delay: 0.2s; }
+  .fade-up-delay-3 { transition-delay: 0.3s; }
+  .fade-up-delay-4 { transition-delay: 0.4s; }
+  .fade-up-delay-5 { transition-delay: 0.5s; }
+
+  /* GLOW PULSE ON HERO */
+  .hero-glow {
+    position: absolute;
+    top: 20%;
+    right: 5%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(0,229,255,0.05) 0%, transparent 60%),
+                radial-gradient(circle at 70% 80%, rgba(255,51,85,0.04) 0%, transparent 60%);
+    pointer-events: none;
+    animation: pulseGlow 6s ease-in-out infinite;
+  }
+  @keyframes pulseGlow {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.1); }
+  }
+
+  /* CYLON SCANNER */
+  .cylon-scanner {
+    position: fixed;
+    left: 0;
+    right: 0;
+    height: 2px;
+    z-index: 150;
+    pointer-events: none;
+    animation: cylonDrift 9s ease-in-out infinite;
+    top: 36px;
+  }
+  @keyframes cylonDrift {
+    0%   { top: 36px; opacity: 0;
+           background: linear-gradient(90deg, transparent 0%, rgba(0,229,255,0) 20%, rgba(0,229,255,0.7) 45%, rgba(0,229,255,1) 50%, rgba(0,229,255,0.7) 55%, rgba(0,229,255,0) 80%, transparent 100%);
+           box-shadow: 0 0 12px 3px rgba(0,229,255,0.5), 0 0 30px 8px rgba(0,229,255,0.2); }
+    3%   { opacity: 1; }
+    30%  { background: linear-gradient(90deg, transparent 0%, rgba(0,229,255,0) 20%, rgba(0,229,255,0.7) 45%, rgba(0,229,255,1) 50%, rgba(0,229,255,0.7) 55%, rgba(0,229,255,0) 80%, transparent 100%);
+           box-shadow: 0 0 12px 3px rgba(0,229,255,0.5), 0 0 30px 8px rgba(0,229,255,0.2); }
+    50%  { background: linear-gradient(90deg, transparent 0%, rgba(255,51,85,0) 20%, rgba(255,51,85,0.7) 45%, rgba(255,51,85,1) 50%, rgba(255,51,85,0.7) 55%, rgba(255,51,85,0) 80%, transparent 100%);
+           box-shadow: 0 0 12px 3px rgba(255,51,85,0.5), 0 0 30px 8px rgba(255,51,85,0.2); }
+    70%  { background: linear-gradient(90deg, transparent 0%, rgba(255,51,85,0) 20%, rgba(255,51,85,0.7) 45%, rgba(255,51,85,1) 50%, rgba(255,51,85,0.7) 55%, rgba(255,51,85,0) 80%, transparent 100%);
+           box-shadow: 0 0 12px 3px rgba(255,51,85,0.5), 0 0 30px 8px rgba(255,51,85,0.2); }
+    90%  { background: linear-gradient(90deg, transparent 0%, rgba(0,229,255,0) 20%, rgba(0,229,255,0.7) 45%, rgba(0,229,255,1) 50%, rgba(0,229,255,0.7) 55%, rgba(0,229,255,0) 80%, transparent 100%);
+           box-shadow: 0 0 12px 3px rgba(0,229,255,0.5), 0 0 30px 8px rgba(0,229,255,0.2); }
+    97%  { opacity: 1; }
+    100% { top: 100vh; opacity: 0;
+           background: linear-gradient(90deg, transparent 0%, rgba(0,229,255,0) 20%, rgba(0,229,255,0.7) 45%, rgba(0,229,255,1) 50%, rgba(0,229,255,0.7) 55%, rgba(0,229,255,0) 80%, transparent 100%);
+           box-shadow: 0 0 12px 3px rgba(0,229,255,0.5), 0 0 30px 8px rgba(0,229,255,0.2); }
+  }
+
+  /* SCANLINE */
+  .scanline {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 200;
+    opacity: 0.4;
+  }
+
+  @media (max-width: 768px) {
+    .problem-grid,
+    .solution-layout,
+    .topics-grid,
+    .formats,
+    .about-layout { grid-template-columns: 1fr; }
+    .hero { padding: 120px 24px 60px; }
+    section { padding: 60px 24px; }
+    .deal-box { padding: 36px 24px; }
+    .proof-divider { display: none; }
+    nav { padding: 14px 24px; }
+    footer { flex-direction: column; text-align: center; }
+    .loom-grid { grid-template-columns: 1fr !important; }
+  }
+</style>
+<link rel="icon" type="image/x-icon" href="/favicon.ico"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png"><link rel="apple-touch-icon" sizes="180x180" href="/favicon-180.png"><meta property="og:image" content="https://partner.connorwithhonor.com/og-image.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://partner.connorwithhonor.com/og-image.png"></head>
+<body>
+
+<div class="scanline"></div>
+<div class="cylon-scanner"></div>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker-track">
+    <span class="ticker-item"><span>▸</span> FREE AI TRAINING FOR YOUR AGENT DATABASE — NO COST TO YOU OR YOUR TEAM</span>
+    <span class="ticker-item red"><span>▸</span> CONNOR MACIVOR — SANTA CLARITA AI EXPERT — 661-400-1720</span>
+    <span class="ticker-item"><span>▸</span> YOU BRING THE AUDIENCE. CONNOR BRINGS THE CONTENT. YOUR AGENTS THINK YOU'RE A HERO.</span>
+    <span class="ticker-item red"><span>▸</span> 28 YEARS REAL ESTATE | 20+ YEARS LAPD | CONNORWITHHONOR.COM</span>
+    <span class="ticker-item"><span>▸</span> FREE AI TRAINING FOR YOUR AGENT DATABASE — NO COST TO YOU OR YOUR TEAM</span>
+    <span class="ticker-item red"><span>▸</span> CONNOR MACIVOR — SANTA CLARITA AI EXPERT — 661-400-1720</span>
+    <span class="ticker-item"><span>▸</span> YOU BRING THE AUDIENCE. CONNOR BRINGS THE CONTENT. YOUR AGENTS THINK YOU'RE A HERO.</span>
+    <span class="ticker-item red"><span>▸</span> 28 YEARS REAL ESTATE | 20+ YEARS LAPD | CONNORWITHHONOR.COM</span>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo"><span class="red">Connor</span><span class="cyan">WithHonor</span></div>
+  <a href="tel:6614001720" class="nav-cta">Call 661-400-1720</a>
+</nav>
+
+<!-- HERO -->
+<section style="padding-top: 0; padding-bottom: 0;">
+  <div class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-content">
+      <div class="hero-eyebrow fade-up">Lenders · Title · Escrow · Brokerages · Team Leaders · Home Inspectors · Anyone Whose Clients Are Agents</div>
+      <h1 class="fade-up fade-up-delay-1">
+        MAKE YOUR<br>
+        AGENTS <span class="accent">REMEMBER</span><br>
+        <span class="gold">YOUR NAME.</span>
+      </h1>
+      <p class="hero-sub fade-up fade-up-delay-2">
+        You've been giving them market reports. Rate sheets. Coffee and donuts.<br>
+        <strong>They're still not calling you back.</strong>
+      </p>
+      <p class="hero-truth fade-up fade-up-delay-3">
+        Give them something they actually need — free AI training they can use Monday morning — and watch the dynamic flip completely.
+      </p>
+      <div class="hero-actions fade-up fade-up-delay-4">
+        <a href="#book-now" class="btn-primary">Book A Free Call</a>
+        <a href="#how-it-works" class="btn-secondary">See How It Works</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LOOM VIDEO SECTION -->
+<section style="padding: 60px 40px; background: var(--panel); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+  <div class="section-inner">
+
+    <!-- TEXT ABOVE -->
+    <div class="fade-up" style="text-align: center; max-width: 800px; margin: 0 auto 40px;">
+      <div class="section-label" style="margin-bottom: 16px;">Watch First</div>
+      <h2 style="font-family: 'Bebas Neue', sans-serif; font-size: clamp(36px, 4vw, 58px); letter-spacing: 0.03em; color: var(--white); line-height: 1; margin-bottom: 20px;">
+        SEE EXACTLY HOW THIS <span style="color: var(--cyan);">WORKS</span> IN <span style="color: var(--gold);">4 MINUTES.</span>
+      </h2>
+      <p style="font-size: 18px; color: var(--text); line-height: 1.7; margin-bottom: 12px;">
+        Connor walks you through the entire concept — what the training looks like, how attribution works, and why agents actually show up for this one.
+      </p>
+      <p style="font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--cyan); letter-spacing: 0.1em;">
+        // NO SALES PITCH · JUST THE REAL PICTURE
+      </p>
+    </div>
+
+    <!-- FULL-WIDTH VIDEO -->
+    <div class="fade-up fade-up-delay-2" style="max-width: 1100px; margin: 0 auto;">
+      <div style="position: relative; padding-bottom: 56.25%; height: 0; border: 1px solid var(--border); box-shadow: 0 0 60px rgba(0,229,255,0.12), 0 0 30px rgba(255,51,85,0.06); background: var(--black); border-radius: 4px; overflow: hidden;">
+        <iframe 
+          src="https://www.loom.com/embed/d20a6ee24ebc414f8795b2cce44b51dc?hide_owner=true&hide_share=true&hide_title=false&hideEmbedTopBar=false" 
+          frameborder="0" 
+          webkitallowfullscreen 
+          mozallowfullscreen 
+          allowfullscreen 
+          style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+        </iframe>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- PROOF BAR -->
+<div class="proof-bar">
+  <div class="proof-inner">
+    <div class="proof-stat fade-up">
+      <div class="num" style="color: var(--cyan);">28+</div>
+      <div class="label">Years SCV Real Estate</div>
+    </div>
+    <div class="proof-divider"></div>
+    <div class="proof-stat fade-up fade-up-delay-1">
+      <div class="num" style="color: var(--red); text-shadow: 0 0 20px var(--red-glow);">20+</div>
+      <div class="label">Years LAPD</div>
+    </div>
+    <div class="proof-divider"></div>
+    <div class="proof-stat fade-up fade-up-delay-2">
+      <div class="num" style="color: var(--cyan);">1,000+</div>
+      <div class="label">Brokers &amp; Agents Trained Live</div>
+    </div>
+    <div class="proof-divider"></div>
+    <div class="proof-stat fade-up fade-up-delay-3">
+      <div class="num" style="color: var(--red); text-shadow: 0 0 20px var(--red-glow);">$0</div>
+      <div class="label">Cost To You</div>
+    </div>
+    <div class="proof-divider"></div>
+    <div class="proof-stat fade-up fade-up-delay-4">
+      <div class="num" style="color: var(--cyan);">24hr</div>
+      <div class="label">Content Always Current</div>
+    </div>
+  </div>
+</div>
+
+<!-- THE PROBLEM -->
+<section>
+  <div class="section-inner">
+    <div class="section-label fade-up">The Real Problem</div>
+    <h2 class="section-title fade-up fade-up-delay-1">AGENT LOYALTY<br>ISN'T <span class="accent">GIVEN.</span><br>IT'S <span class="gold">EARNED.</span></h2>
+    <p style="max-width: 680px; font-size: 18px; color: var(--text); margin-top: 16px; margin-bottom: 0; line-height: 1.7;" class="fade-up fade-up-delay-2">
+      Whether you're a lender, title rep, escrow officer — or a broker trying to keep your own team locked in — the dynamic is the same. <strong style="color: var(--white);">Agents go where the value is.</strong> The question is whether you're providing enough of it to stay top of mind when it matters.
+    </p>
+    <div class="problem-grid">
+      <div class="problem-card fade-up">
+        <div class="icon">📊</div>
+        <h3>Attention Is Borrowed, Not Owned</h3>
+        <p>Market data, rate updates, transaction summaries — agents consume what's useful and move on. You don't hear back until they have a deal or need something. That's not a character flaw. That's how a busy professional operates.</p>
+      </div>
+      <div class="problem-card fade-up fade-up-delay-1">
+        <div class="icon">📅</div>
+        <h3>Generic Events Don't Move The Needle</h3>
+        <p>CE classes, lunch-and-learns, happy hours. The ones who show up already work with you. The agents and team leaders you're trying to reach aren't coming for another pitch — they need a reason that benefits them directly.</p>
+      </div>
+      <div class="problem-card fade-up fade-up-delay-2">
+        <div class="icon">📱</div>
+        <h3>Everyone Is Competing For The Same Inbox</h3>
+        <p>Every lender, every title rep, every vendor in the market is sending the same emails and making the same calls. Standing out requires offering something nobody else is offering — something that actually helps their business grow.</p>
+      </div>
+      <div class="problem-card fade-up fade-up-delay-3">
+        <div class="icon">🤖</div>
+        <h3>AI Has Every Agent Feeling Left Behind</h3>
+        <p>Brokers, team leaders, solo agents — everyone knows AI is changing the game. Almost none of them know where to start. They're overwhelmed, behind, and quietly anxious about it. That anxiety is your open door.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- THE SOLUTION -->
+<section style="background: var(--panel); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+  <div class="section-inner">
+    <div class="section-label fade-up">The Solution</div>
+    <h2 class="section-title fade-up fade-up-delay-1">YOU BECOME THE PERSON<br>WHO GAVE THEM <span class="accent">THE ANSWER.</span></h2>
+    <div class="solution-layout">
+      <div class="solution-text fade-up fade-up-delay-2">
+        <p>Here's the play: <strong>You sponsor a free AI training session for your agent database.</strong> You put your name on it. You send the invite. Your agents show up because they actually want what's being offered.</p>
+        <p>Connor MacIvor runs the entire show — the content, the presentation, the Q&A, the follow-up. <strong>Everything is attributed to you as the person who made it happen.</strong></p>
+        <p>You don't need to prepare anything. You don't need to know anything about AI. You just need a list of agents you want to get closer to — and the willingness to give them something real.</p>
+        <div class="solution-highlight">
+          <p>The agent who leaves that training thinking <em>"my lender brought me something I actually needed"</em> — that's the agent who sends you their next deal.</p>
+        </div>
+      </div>
+      <div class="fade-up fade-up-delay-3">
+        <div style="background: var(--black); border: 1px solid var(--border); padding: 36px;">
+          <div style="font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--cyan); letter-spacing: 0.15em; margin-bottom: 20px; text-transform: uppercase;">What This Does For You</div>
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 16px;">
+            <li style="display: flex; gap: 14px; font-size: 16px; color: var(--text);">
+              <span style="color: var(--gold); flex-shrink: 0;">✓</span>
+              <span><strong style="color: var(--white);">You stand out immediately</strong> from every other rep doing the same thing as everyone else</span>
+            </li>
+            <li style="display: flex; gap: 14px; font-size: 16px; color: var(--text);">
+              <span style="color: var(--gold); flex-shrink: 0;">✓</span>
+              <span><strong style="color: var(--white);">You get face time</strong> with agents who won't take your calls — because they voluntarily showed up</span>
+            </li>
+            <li style="display: flex; gap: 14px; font-size: 16px; color: var(--text);">
+              <span style="color: var(--gold); flex-shrink: 0;">✓</span>
+              <span><strong style="color: var(--white);">You become the resource</strong>, not the vendor — a completely different relationship dynamic</span>
+            </li>
+            <li style="display: flex; gap: 14px; font-size: 16px; color: var(--text);">
+              <span style="color: var(--gold); flex-shrink: 0;">✓</span>
+              <span><strong style="color: var(--white);">Full attribution</strong> — your name, your brand, your event. Connor is behind the curtain.</span>
+            </li>
+            <li style="display: flex; gap: 14px; font-size: 16px; color: var(--text);">
+              <span style="color: var(--gold); flex-shrink: 0;">✓</span>
+              <span><strong style="color: var(--white);">Zero cost</strong> — no speaker fee, no venue, no catering. Just your Zoom link and your list.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REFERRAL GAP CALCULATOR -->
+<section style="background: var(--black); border-top: 2px solid var(--red); border-bottom: 1px solid var(--border);">
+  <div class="section-inner">
+    <div class="section-label fade-up" style="color: var(--red);">Interactive Tool</div>
+    <h2 class="section-title fade-up fade-up-delay-1">THE <span style="color: var(--red);">REFERRAL GAP</span><br>CALCULATOR.</h2>
+    <p style="max-width: 620px; font-size: 17px; color: var(--text); margin-top: 16px; margin-bottom: 48px; line-height: 1.7;" class="fade-up fade-up-delay-2">See exactly how much revenue is sitting on the table in your agent network — and what closing even a fraction of that gap is worth to your business.</p>
+
+    <div class="fade-up fade-up-delay-3" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px; max-width: 1000px;">
+
+      <!-- INPUTS -->
+      <div style="background: var(--panel); border: 1px solid var(--border); border-top: 3px solid var(--red); padding: 40px;">
+        <div style="font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.1em; color: var(--white); margin-bottom: 28px;">YOUR NUMBERS</div>
+
+        <div style="margin-bottom: 24px;">
+          <label style="font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--cyan); letter-spacing: 0.15em; display: block; margin-bottom: 10px;">// YOUR ROLE</label>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="roleButtons">
+            <button onclick="setRole('lender',this)" class="role-btn active-role">Lender</button>
+            <button onclick="setRole('title',this)" class="role-btn">Title</button>
+            <button onclick="setRole('escrow',this)" class="role-btn">Escrow</button>
+            <button onclick="setRole('broker',this)" class="role-btn">Broker / Team</button>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 22px;">
+          <label style="font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--cyan); letter-spacing: 0.15em; display: block; margin-bottom: 8px;">// AGENTS IN YOUR NETWORK</label>
+          <input type="range" id="agentCount" min="5" max="200" value="40" oninput="calcGap()" style="width:100%; accent-color: var(--red);">
+          <div style="font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--white); margin-top: 4px;"><span id="agentCountVal">40</span> <span style="font-size: 14px; color: var(--muted); font-family: 'Barlow Condensed', sans-serif;">agents</span></div>
+        </div>
+
+        <div style="margin-bottom: 22px;">
+          <label style="font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--cyan); letter-spacing: 0.15em; display: block; margin-bottom: 8px;">// AVG TRANSACTIONS PER AGENT / YEAR</label>
+          <input type="range" id="txPerAgent" min="2" max="30" value="8" oninput="calcGap()" style="width:100%; accent-color: var(--red);">
+          <div style="font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--white); margin-top: 4px;"><span id="txPerAgentVal">8</span> <span style="font-size: 14px; color: var(--muted); font-family: 'Barlow Condensed', sans-serif;">transactions</span></div>
+        </div>
+
+        <div style="margin-bottom: 22px;">
+          <label style="font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--cyan); letter-spacing: 0.15em; display: block; margin-bottom: 8px;" id="revenueLabel">// YOUR REVENUE PER TRANSACTION ($)</label>
+          <input type="range" id="revenuePerTx" min="500" max="10000" step="250" value="2500" oninput="calcGap()" style="width:100%; accent-color: var(--red);">
+          <div style="font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--white); margin-top: 4px;">$<span id="revenuePerTxVal">2,500</span></div>
+        </div>
+
+        <div style="margin-bottom: 22px;">
+          <label style="font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--cyan); letter-spacing: 0.15em; display: block; margin-bottom: 8px;">// % OF AGENTS CURRENTLY LOYAL TO YOU</label>
+          <input type="range" id="loyaltyPct" min="5" max="80" value="25" oninput="calcGap()" style="width:100%; accent-color: var(--red);">
+          <div style="font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--white); margin-top: 4px;"><span id="loyaltyPctVal">25</span>%</div>
+        </div>
+      </div>
+
+      <!-- RESULTS -->
+      <div style="background: var(--deep); border: 1px solid var(--border); border-top: 3px solid var(--cyan); padding: 40px; display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.1em; color: var(--white); margin-bottom: 28px;">YOUR RESULTS</div>
+
+          <div style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border);">
+            <div style="font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.12em; margin-bottom: 6px;">CURRENT ANNUAL REVENUE FROM AGENT NETWORK</div>
+            <div style="font-family: 'Bebas Neue', sans-serif; font-size: 48px; color: var(--cyan); letter-spacing: 0.05em;" id="currentRevenue">$80,000</div>
+          </div>
+
+          <div style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border);">
+            <div style="font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.12em; margin-bottom: 6px;">IF LOYALTY INCREASED BY 20% — NEW REVENUE</div>
+            <div style="font-family: 'Bebas Neue', sans-serif; font-size: 48px; color: var(--gold); letter-spacing: 0.05em;" id="improvedRevenue">$144,000</div>
+          </div>
+
+          <div style="margin-bottom: 32px; background: var(--red-dim); border: 1px solid var(--red); padding: 20px;">
+            <div style="font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--red); letter-spacing: 0.12em; margin-bottom: 6px;">THE GAP — MONEY LEFT ON THE TABLE EVERY YEAR</div>
+            <div style="font-family: 'Bebas Neue', sans-serif; font-size: 64px; color: var(--red); letter-spacing: 0.05em; text-shadow: 0 0 30px var(--red-glow);" id="gapRevenue">$64,000</div>
+          </div>
+
+          <div style="background: var(--panel); border: 1px solid var(--border); padding: 16px; margin-bottom: 24px;">
+            <div style="font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.12em; margin-bottom: 6px;">FULL NETWORK POTENTIAL (100% LOYALTY)</div>
+            <div style="font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--white);" id="fullPotential">$320,000</div>
+          </div>
+
+          <div id="roleInsight" style="font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 600; color: var(--text); line-height: 1.5; padding: 16px; border-left: 3px solid var(--cyan); background: var(--cyan-dim);">
+            For lenders: one training session that makes 5 more agents remember your name at closing time closes this gap faster than any rate sheet ever will.
+          </div>
+        </div>
+
+        <a href="#book-now" style="display: block; margin-top: 24px; background: var(--red); color: var(--white); font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 16px; letter-spacing: 0.1em; text-transform: uppercase; padding: 16px 28px; text-align: center; text-decoration: none; clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%); box-shadow: 0 0 24px var(--red-glow); transition: all 0.25s;">
+          Close The Gap — Book A Free Session
+        </a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works">
+  <div class="section-inner">
+    <div class="section-label fade-up">The Full Campaign System</div>
+    <h2 class="section-title fade-up fade-up-delay-1">THIS ISN'T A <span class="accent">ZOOM CALL.</span><br>IT'S A <span class="gold">4-TOUCH</span><br>AGENT CAMPAIGN.</h2>
+    <p style="max-width: 680px; font-size: 18px; color: var(--text); margin-top: 16px; margin-bottom: 0; line-height: 1.7;" class="fade-up fade-up-delay-2">When you want to run it — on your schedule, for your database — Connor launches a full outreach campaign on your behalf. Every touch point carries your name. Every message reinforces your brand as the professional who actually gives a damn about their agents' success.</p>
+
+    <!-- ATTRIBUTION LINE -->
+    <div class="fade-up fade-up-delay-3" style="margin: 40px 0; background: var(--black); border: 1px solid var(--border); border-left: 4px solid var(--gold); padding: 28px 32px; max-width: 860px;">
+      <div style="font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--gold); letter-spacing: 0.2em; margin-bottom: 12px; text-transform: uppercase;">// The Attribution Line — Said In Every Touch Point</div>
+      <p style="font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 600; color: var(--white); line-height: 1.5; margin: 0;">
+        "This AI briefing was coordinated and brought to you by <span style="color: var(--cyan);">[Your Name]</span> at <span style="color: var(--cyan);">[Your Company]</span> — because while everyone else is asking agents for business, <span style="color: var(--gold);">[Your Name] asked a different question: 'How can I help YOUR business grow?'"</span>
+      </p>
+    </div>
+
+    <!-- 4 TOUCH STEPS -->
+    <div class="steps">
+
+      <div class="step fade-up">
+        <div class="step-num">01</div>
+        <div class="step-content">
+          <h3>The Mega Email Campaign — Launched Under Your Name</h3>
+          <p>Connor writes a full email campaign to your agent database — your voice, your brand, your attribution on every line. It introduces the AI briefing, explains why you coordinated it, and positions you as the professional who's thinking about their success when nobody else is. Agents open it because it's from someone they know. They respond because the offer is real.</p>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px;">
+            <span class="tag">Written by Connor</span>
+            <span class="tag">Sent under your name</span>
+            <span class="tag">Your database stays yours</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="step fade-up fade-up-delay-1">
+        <div class="step-num">02</div>
+        <div class="step-content">
+          <h3>Personal SMS To Every Agent — With Your Sponsorship</h3>
+          <p>Each agent on your list receives a direct personal text message with a link to the show — and your name front and center as the person who made it happen. Not a blast. Not a generic drip. A personal-feeling message that reads like you picked up the phone yourself. The SMS says exactly what you want every agent to hear: you coordinated this because you care about their growth, not just your pipeline.</p>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px;">
+            <span class="tag">Personalized per agent</span>
+            <span class="tag">Your name as sponsor</span>
+            <span class="tag">Direct link to the show</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="step fade-up fade-up-delay-2">
+        <div class="step-num">03</div>
+        <div class="step-content">
+          <h3>The Live AI Briefing — Built Around Your Audience</h3>
+          <p>Connor runs the show. The content is built specifically for your agents — their level, their niche, their market. Current AI news from the last 24 hours is woven in so it's never stale. Every story is explained with a plain-language "it's like..." analogy so nobody gets left behind. Your name and company are credited at the open, throughout, and at the close. Connor is the presenter. You are the hero.</p>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px;">
+            <span class="tag">40 min to 4 hours — your call</span>
+            <span class="tag">Live Q&A included</span>
+            <span class="tag">Your brand in every slide</span>
+            <span class="tag">Always 24hr current</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="step fade-up fade-up-delay-3">
+        <div class="step-num">04</div>
+        <div class="step-content">
+          <h3>The Follow-Up — Your Relationship, Your Timing</h3>
+          <p>After the show, the agents who attended now associate your name with one of the most useful things anyone in your field has ever given them. Connor has opened the door. What you do next is entirely yours — a follow-up call, a personal text, a meeting request. You have something to reference now. "Hey, I coordinated that AI training last week" is a completely different conversation opener than "Hey, do you have any deals coming up?"</p>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px;">
+            <span class="tag">You own every relationship</span>
+            <span class="tag">No competing mentions</span>
+            <span class="tag">Warm audience, not cold</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- CAMPAIGN VISUAL SUMMARY -->
+    <div class="fade-up" style="margin-top: 48px; background: var(--panel); border: 1px solid var(--border); border-top: 3px solid var(--red); padding: 40px;">
+      <div style="font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--red); letter-spacing: 0.2em; margin-bottom: 28px; text-transform: uppercase;">// The 4-Touch Attribution Map</div>
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px;">
+        <div style="background: var(--black); border: 1px solid var(--border); border-top: 2px solid var(--cyan); padding: 24px; text-align: center;">
+          <div style="font-size: 28px; margin-bottom: 10px;">📧</div>
+          <div style="font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 0.08em; color: var(--white); margin-bottom: 8px;">Email Campaign</div>
+          <div style="font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--cyan); letter-spacing: 0.08em;">Your name · Your brand</div>
+        </div>
+        <div style="background: var(--black); border: 1px solid var(--border); border-top: 2px solid var(--red); padding: 24px; text-align: center;">
+          <div style="font-size: 28px; margin-bottom: 10px;">📱</div>
+          <div style="font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 0.08em; color: var(--white); margin-bottom: 8px;">Personal SMS</div>
+          <div style="font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--red); letter-spacing: 0.08em;">Sponsored by you</div>
+        </div>
+        <div style="background: var(--black); border: 1px solid var(--border); border-top: 2px solid var(--cyan); padding: 24px; text-align: center;">
+          <div style="font-size: 28px; margin-bottom: 10px;">🎙️</div>
+          <div style="font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 0.08em; color: var(--white); margin-bottom: 8px;">Live Briefing</div>
+          <div style="font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--cyan); letter-spacing: 0.08em;">Attributed to you · Live</div>
+        </div>
+        <div style="background: var(--black); border: 1px solid var(--border); border-top: 2px solid var(--gold); padding: 24px; text-align: center;">
+          <div style="font-size: 28px; margin-bottom: 10px;">🤝</div>
+          <div style="font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 0.08em; color: var(--white); margin-bottom: 8px;">Your Follow-Up</div>
+          <div style="font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--gold); letter-spacing: 0.08em;">Warm door · Your move</div>
+        </div>
+      </div>
+      <p style="font-size: 15px; color: var(--muted); margin-top: 20px; text-align: center; font-style: italic;">Run it when you want it. On your schedule. For your database. No recurring commitment required.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- THE QUESTION NOBODY IS ASKING -->
+<section style="background: var(--black); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+  <div class="section-inner">
+    <div class="section-label fade-up" style="color: var(--red);">The Differentiator</div>
+    <h2 class="section-title fade-up fade-up-delay-1">THE QUESTION<br><span style="color: var(--red);">NOBODY ELSE</span><br>IN YOUR FIELD<br>IS <span class="gold">ASKING.</span></h2>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-top: 48px;">
+
+      <div class="fade-up fade-up-delay-1" style="background: var(--panel); border: 1px solid var(--border); border-top: 2px solid var(--muted); padding: 36px; opacity: 0.8;">
+        <div style="font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.15em; margin-bottom: 20px; text-transform: uppercase;">// What Everyone Else Is Asking</div>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 16px;">
+          <li style="display: flex; gap: 14px; font-size: 17px; color: var(--muted);">
+            <span style="flex-shrink: 0;">→</span><span>"Do you have a deal for me?"</span>
+          </li>
+          <li style="display: flex; gap: 14px; font-size: 17px; color: var(--muted);">
+            <span style="flex-shrink: 0;">→</span><span>"Can I be your preferred lender / title / escrow?"</span>
+          </li>
+          <li style="display: flex; gap: 14px; font-size: 17px; color: var(--muted);">
+            <span style="flex-shrink: 0;">→</span><span>"Remember me when you close something?"</span>
+          </li>
+          <li style="display: flex; gap: 14px; font-size: 17px; color: var(--muted);">
+            <span style="flex-shrink: 0;">→</span><span>"Can I take you to lunch?"</span>
+          </li>
+          <li style="display: flex; gap: 14px; font-size: 17px; color: var(--muted);">
+            <span style="flex-shrink: 0;">→</span><span>"Here's another rate sheet. Call me."</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="fade-up fade-up-delay-2" style="background: var(--panel); border: 1px solid var(--border); border-top: 3px solid var(--cyan); padding: 36px; box-shadow: inset 0 0 40px var(--cyan-dim);">
+        <div style="font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--cyan); letter-spacing: 0.15em; margin-bottom: 20px; text-transform: uppercase;">// What You're Asking</div>
+        <div style="font-family: 'Bebas Neue', sans-serif; font-size: 42px; color: var(--white); line-height: 1.1; letter-spacing: 0.03em; margin-bottom: 20px;">
+          "HOW CAN I HELP <span style="color: var(--cyan);">YOUR</span> BUSINESS GROW?"
+        </div>
+        <p style="font-size: 16px; color: var(--text); line-height: 1.7;">That one question — backed by a real AI training campaign delivered under your name — repositions you from vendor to partner. From someone they tolerate to someone they trust. From a name in their contact list to the person they think of first when a deal is ready to close.</p>
+      </div>
+
+    </div>
+
+    <!-- WHO THIS IS FOR - EXPANDED -->
+    <div class="fade-up" style="margin-top: 48px;">
+      <div style="font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--cyan); letter-spacing: 0.2em; margin-bottom: 24px; text-transform: uppercase;">// This Works For Anyone Whose Business Runs On Agent Relationships</div>
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+
+        <div style="background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--red); padding: 20px;">
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 0.06em; color: var(--white); text-transform: uppercase; margin-bottom: 8px;">Mortgage Lenders</div>
+          <p style="font-size: 13px; color: var(--muted); line-height: 1.6;">You need agents sending buyers your way. This puts your name on something agents actually want — and keeps you top of mind when the offer gets accepted.</p>
+        </div>
+
+        <div style="background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--cyan); padding: 20px;">
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 0.06em; color: var(--white); text-transform: uppercase; margin-bottom: 8px;">Title Companies</div>
+          <p style="font-size: 13px; color: var(--muted); line-height: 1.6;">In a commoditized market where every title rep looks the same, the one who brings agents an AI growth campaign stands completely alone.</p>
+        </div>
+
+        <div style="background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--red); padding: 20px;">
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 0.06em; color: var(--white); text-transform: uppercase; margin-bottom: 8px;">Escrow Officers</div>
+          <p style="font-size: 13px; color: var(--muted); line-height: 1.6;">Escrow is the last impression agents have before a deal closes. Be the reason they felt supported and equipped the whole way through — starting before they even open escrow.</p>
+        </div>
+
+        <div style="background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--cyan); padding: 20px;">
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 0.06em; color: var(--white); text-transform: uppercase; margin-bottom: 8px;">Brokerage Owners</div>
+          <p style="font-size: 13px; color: var(--muted); line-height: 1.6;">Agent retention isn't about splitting commission. It's about making agents feel like they're growing. An AI briefing series is the kind of training that keeps top producers from looking elsewhere.</p>
+        </div>
+
+        <div style="background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--gold); padding: 20px;">
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 0.06em; color: var(--white); text-transform: uppercase; margin-bottom: 8px;">Team Leaders</div>
+          <p style="font-size: 13px; color: var(--muted); line-height: 1.6;">Your team needs AI skills to compete. Bring them a live briefing — current, relevant, and built around what your specific team needs to level up right now.</p>
+        </div>
+
+        <div style="background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--red); padding: 20px;">
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 0.06em; color: var(--white); text-transform: uppercase; margin-bottom: 8px;">Home Inspectors</div>
+          <p style="font-size: 13px; color: var(--muted); line-height: 1.6;">Agents choose inspectors based on trust and reliability. Being the inspector who brought them a real AI training campaign is a differentiator that zero other inspectors in your market are offering.</p>
+        </div>
+
+        <div style="background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--cyan); padding: 20px;">
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 0.06em; color: var(--white); text-transform: uppercase; margin-bottom: 8px;">Real Estate Attorneys</div>
+          <p style="font-size: 13px; color: var(--muted); line-height: 1.6;">Agents rarely think about their RE attorney until they need one. This campaign puts your name in front of your entire agent network — proactively, generously, memorably.</p>
+        </div>
+
+        <div style="background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--gold); padding: 20px;">
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 0.06em; color: var(--white); text-transform: uppercase; margin-bottom: 8px;">Any B2B Serving Agents</div>
+          <p style="font-size: 13px; color: var(--muted); line-height: 1.6;">If your business depends on agents — and agents are hard to reach, hard to keep, and constantly being courted by your competitors — this campaign changes the entire dynamic.</p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- WHAT AGENTS LEARN -->
+<section style="background: var(--panel); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+  <div class="section-inner">
+    <div class="section-label fade-up">The Content</div>
+    <h2 class="section-title fade-up fade-up-delay-1">WHAT YOUR AGENTS<br>ACTUALLY <span class="accent">LEARN.</span></h2>
+    <p style="max-width: 640px; font-size: 17px; color: var(--text); margin-top: 20px;" class="fade-up fade-up-delay-2">Every session is updated with the latest 24-hour AI news cycle. Here's what gets covered — in plain language, no jargon, no PhD required.</p>
+    <div class="topics-grid">
+      <div class="topic-card fade-up">
+        <div class="topic-num">// 01</div>
+        <h4>What AI Actually Is</h4>
+        <p>Is it Jarvis from Iron Man? Is it HAL 9000? We start from the beginning so nobody feels dumb for asking. Then we build from there.</p>
+      </div>
+      <div class="topic-card fade-up fade-up-delay-1">
+        <div class="topic-num">// 02</div>
+        <h4>ChatGPT vs. Claude vs. Grok vs. Copilot</h4>
+        <p>What's the difference, which one should they use, and why does it matter for their business specifically. Clear, direct, no fluff.</p>
+      </div>
+      <div class="topic-card fade-up fade-up-delay-2">
+        <div class="topic-num">// 03</div>
+        <h4>Never Miss A Lead Again</h4>
+        <p>AI voice agents, automated follow-up, and systems that respond while the agent is sleeping. The stuff that actually moves the needle.</p>
+      </div>
+      <div class="topic-card fade-up fade-up-delay-3">
+        <div class="topic-num">// 04</div>
+        <h4>Content In Minutes, Not Hours</h4>
+        <p>How to use AI to create listings, social posts, emails, and video scripts in a fraction of the time — without it sounding like a robot wrote it.</p>
+      </div>
+      <div class="topic-card fade-up fade-up-delay-4">
+        <div class="topic-num">// 05</div>
+        <h4>Where Agents Get It Wrong</h4>
+        <p>The four most common AI mistakes — using it as a replacement, trusting it blindly, buying every tool, or doing nothing. All four kill businesses.</p>
+      </div>
+      <div class="topic-card fade-up fade-up-delay-5">
+        <div class="topic-num">// 06</div>
+        <h4>The Jobs Being Eliminated & What's Safe</h4>
+        <p>Straight talk on where real estate sits in the AI displacement wave — and which agents will be fine and which ones are already behind.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FORMAT OPTIONS -->
+<section>
+  <div class="section-inner">
+    <div class="section-label fade-up">Formats</div>
+    <h2 class="section-title fade-up fade-up-delay-1">RUN IT<br><span class="accent">YOUR WAY.</span></h2>
+    <p style="max-width: 600px; font-size: 17px; color: var(--text); margin-top: 16px;" class="fade-up fade-up-delay-2">Every show is customized to your audience and goals. Here are the three most common formats — but Connor will build whatever fits best.</p>
+    <div class="formats">
+      <div class="format-card fade-up">
+        <div class="format-icon">⚡</div>
+        <h3>The Quick Hit</h3>
+        <p>40–45 minutes. Tight, focused, high-impact. Perfect for a lunch-and-learn, a broker meeting, or a quick quarterly touchpoint with your top agents.</p>
+      </div>
+      <div class="format-card fade-up fade-up-delay-1">
+        <div class="format-icon">🎯</div>
+        <h3>The Deep Dive</h3>
+        <p>60–90 minutes with extended Q&A. For audiences who are serious about implementation — agents who want to actually walk away with a plan, not just awareness.</p>
+      </div>
+      <div class="format-card fade-up fade-up-delay-2">
+        <div class="format-icon">🔥</div>
+        <h3>The Full Training</h3>
+        <p>2–4 hours. Full hands-on AI training session. Step-by-step implementation, live tool walkthroughs, Q&A. For brokerages who want to move their entire team forward at once.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AI READINESS SCORE -->
+<section style="background: var(--panel); border-top: 1px solid var(--border); border-bottom: 2px solid var(--cyan);">
+  <div class="section-inner">
+    <div class="section-label fade-up" style="color: var(--cyan);">Agent Tool</div>
+    <h2 class="section-title fade-up fade-up-delay-1">WHAT'S YOUR<br><span style="color: var(--cyan);">AI READINESS</span><br>SCORE?</h2>
+    <p style="max-width: 600px; font-size: 17px; color: var(--text); margin-top: 16px; margin-bottom: 48px; line-height: 1.7;" class="fade-up fade-up-delay-2">5 questions. 60 seconds. Find out exactly where you — or your agents — stand in the AI adoption curve. Share it with your team.</p>
+
+    <div class="fade-up fade-up-delay-3" style="max-width: 760px;">
+      <div id="quizContainer" style="background: var(--black); border: 1px solid var(--border); border-top: 3px solid var(--cyan); padding: 40px;">
+
+        <!-- PROGRESS BAR -->
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 32px;">
+          <div style="flex: 1; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden;">
+            <div id="quizProgress" style="height: 100%; background: linear-gradient(90deg, var(--cyan), var(--red)); width: 20%; transition: width 0.4s ease;"></div>
+          </div>
+          <div style="font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.1em; white-space: nowrap;">Q <span id="qNum">1</span> / 5</div>
+        </div>
+
+        <!-- QUESTION DISPLAY -->
+        <div id="questionArea">
+          <div style="font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--red); letter-spacing: 0.15em; margin-bottom: 12px;" id="qCategory">// DAILY USAGE</div>
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 700; color: var(--white); line-height: 1.3; margin-bottom: 28px;" id="qText">How often do you currently use any AI tool (ChatGPT, Claude, Copilot, etc.) in your real estate business?</div>
+          <div id="qOptions" style="display: flex; flex-direction: column; gap: 10px;"></div>
+        </div>
+
+        <!-- RESULT (hidden initially) -->
+        <div id="quizResult" style="display:none; text-align: center;">
+          <div style="font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.15em; margin-bottom: 12px;">YOUR AI READINESS SCORE</div>
+          <div id="scoreNumber" style="font-family: 'Bebas Neue', sans-serif; font-size: 96px; line-height: 1; letter-spacing: 0.05em; margin-bottom: 8px;"></div>
+          <div id="scoreLabel" style="font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 0.1em; margin-bottom: 20px;"></div>
+          <div id="scoreDesc" style="font-size: 17px; color: var(--text); line-height: 1.7; max-width: 520px; margin: 0 auto 32px;"></div>
+          <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+            <a href="#book-now" style="background: var(--cyan); color: var(--black); font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 15px; letter-spacing: 0.1em; text-transform: uppercase; padding: 14px 28px; text-decoration: none; clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);">Get The Training — Free</a>
+            <button onclick="resetQuiz()" style="background: transparent; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 14px; letter-spacing: 0.1em; text-transform: uppercase; padding: 14px 20px; border: 1px solid var(--border); cursor: pointer; transition: all 0.2s;">Retake Quiz</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT CONNOR -->
+<section style="background: var(--panel); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+  <div class="section-inner">
+    <div class="section-label fade-up">Who Is Connor</div>
+    <h2 class="section-title fade-up fade-up-delay-1">NOT ANOTHER<br><span class="accent">TECH BRO</span> WITH A<br><span class="gold">SLIDE DECK.</span></h2>
+    <div class="about-layout">
+      <div class="about-card fade-up fade-up-delay-2">
+        <div style="position: relative; margin-bottom: 20px; overflow: hidden;">
+          <img 
+            src="https://assets.cdn.filesafe.space/wGQNykcwXU4XZhG6toH7/media/69acafca36702f7f4f527e43.png" 
+            alt="Connor MacIvor — AI Growth Architect, Santa Clarita Real Estate"
+            style="width: 100%; display: block; filter: contrast(1.05) brightness(0.95);"
+          />
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 60px; background: linear-gradient(transparent, var(--panel));"></div>
+          <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--red); box-shadow: 0 0 12px var(--red-glow);"></div>
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: var(--cyan); box-shadow: 0 0 12px var(--cyan-glow);"></div>
+        </div>
+        <div class="about-name">Connor<br>MacIvor</div>
+        <div class="about-title">AI Growth Architect · Santa Clarita</div>
+        <span class="about-badge">CA DRE #01238257</span>
+        <span class="about-badge">Former LAPD Officer</span>
+        <span class="about-badge">HonorElevate.com — AI Agency</span>
+        <span class="about-badge">ConnorWithHonor.com</span>
+        <div class="about-contact">
+          <a href="tel:6614001720">📞 661-400-1720</a>
+          <a href="/cdn-cgi/l/email-protection#d6b5b9b8b8b9a496beb9b8b9a4b3bab3a0b7a2b3f8b5b9bb">✉ <span class="__cf_email__" data-cfemail="d3b0bcbdbdbca193bbbcbdbca1b6bfb6a5b2a7b6fdb0bcbe">[email&#160;protected]</span></a>
+          <a href="https://www.ConnorWithHonor.com" target="_blank">🌐 ConnorWithHonor.com</a>
+        </div>
+      </div>
+      <div class="about-text fade-up fade-up-delay-3">
+        <p>Connor MacIvor has been selling real estate in Santa Clarita since August 1998 — 28 years in the market, through every cycle, every crash, and every comeback. Before that, he spent more than 20 years with the LAPD — first as a full-time officer, then as a reserve through 2013.</p>
+        <p>He's not a Silicon Valley guy who discovered real estate. He's a guy who spent decades doing the work, building the relationships, and figuring out what actually moves the needle — and then watched AI arrive and decided to get out in front of it instead of hide from it.</p>
+        <p><strong>He lost 135 pounds through discipline, not shortcuts.</strong> He built his agency, HonorElevate, from scratch. He's trained over 1,000 brokers and agents on AI integration in real estate — and the feedback is always the same: <em>"This is the first time someone explained this in a way I could actually use."</em></p>
+        <ul class="cred-list">
+          <li>Presented to 200+ brokers as a member of the Southland Regional Association of Realtors — in person and on Zoom</li>
+          <li>Spoke directly with the SCV Board of Realtors on AI implementation</li>
+          <li>Runs daily AI news show — AI With Honor, The Daily Download</li>
+          <li>Founder of HonorElevate.com — AI automation agency for local businesses</li>
+          <li>Currently operating as Santa Clarita's only sellers-only listing agent</li>
+          <li>Participant in Stanford AI research studies since 2021</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ZERO VENDOR PITCH -->
+<section style="background: var(--black); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+  <div class="section-inner">
+    <div class="section-label fade-up">The Ground Rules</div>
+    <h2 class="section-title fade-up fade-up-delay-1">ONE THING THAT MAKES<br>THIS <span class="accent">DIFFERENT</span> FROM<br>EVERY OTHER <span class="gold">TRAINING.</span></h2>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 48px;">
+
+      <div class="fade-up fade-up-delay-1" style="background: var(--panel); border: 1px solid var(--border); border-left: 4px solid var(--red); padding: 36px;">
+        <div style="font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 0.08em; color: var(--red); margin-bottom: 16px;">WHAT CONNOR WILL NEVER DO</div>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 14px;">
+          <li style="display: flex; gap: 14px; font-size: 16px; color: var(--text);">
+            <span style="color: var(--red); flex-shrink: 0; font-size: 18px;">✗</span>
+            <span>Mention his brokerage or pitch anyone to list or buy with him</span>
+          </li>
+          <li style="display: flex; gap: 14px; font-size: 16px; color: var(--text);">
+            <span style="color: var(--red); flex-shrink: 0; font-size: 18px;">✗</span>
+            <span>Mention any competing vendors, lenders, title companies, or service providers</span>
+          </li>
+          <li style="display: flex; gap: 14px; font-size: 16px; color: var(--text);">
+            <span style="color: var(--red); flex-shrink: 0; font-size: 18px;">✗</span>
+            <span>Try to poach your agents, your referral network, or your business relationships</span>
+          </li>
+          <li style="display: flex; gap: 14px; font-size: 16px; color: var(--text);">
+            <span style="color: var(--red); flex-shrink: 0; font-size: 18px;">✗</span>
+            <span>Turn the session into a pitch for anything other than AI knowledge and implementation</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="fade-up fade-up-delay-2" style="background: var(--panel); border: 1px solid var(--border); border-left: 4px solid var(--cyan); padding: 36px;">
+        <div style="font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 0.08em; color: var(--cyan); margin-bottom: 16px;">WHAT THIS SESSION IS 100% ABOUT</div>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 14px;">
+          <li style="display: flex; gap: 14px; font-size: 16px; color: var(--text);">
+            <span style="color: var(--cyan); flex-shrink: 0; font-size: 18px;">✓</span>
+            <span>Artificial intelligence — what it is, how it works, what it means for agents right now</span>
+          </li>
+          <li style="display: flex; gap: 14px; font-size: 16px; color: var(--text);">
+            <span style="color: var(--cyan); flex-shrink: 0; font-size: 18px;">✓</span>
+            <span><strong style="color: var(--white);">You</strong> — the person who coordinated it. Your name, your brand, your moment in the room</span>
+          </li>
+          <li style="display: flex; gap: 14px; font-size: 16px; color: var(--text);">
+            <span style="color: var(--cyan); flex-shrink: 0; font-size: 18px;">✓</span>
+            <span>Practical tools agents can implement the same week — no fluff, no theory, no wasted time</span>
+          </li>
+          <li style="display: flex; gap: 14px; font-size: 16px; color: var(--text);">
+            <span style="color: var(--cyan); flex-shrink: 0; font-size: 18px;">✓</span>
+            <span>Building your reputation as the professional who brings real value — not just another vendor asking for referrals</span>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="fade-up fade-up-delay-3" style="margin-top: 32px; background: var(--panel); border: 1px solid var(--border); border-top: 3px solid var(--gold); padding: 32px 36px; max-width: 860px; margin-left: auto; margin-right: auto;">
+      <p style="font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 600; color: var(--white); line-height: 1.5; text-align: center;">
+        "This training works because <span style="color: var(--gold);">it isn't about Connor</span> — and it isn't about you selling anything.<br>
+        It's about your agents walking away smarter. <span style="color: var(--cyan);">That's what they'll remember you for.</span>"
+      </p>
+    </div>
+
+    <div class="fade-up fade-up-delay-4" style="margin-top: 40px;">
+      <div class="section-label" style="margin-bottom: 20px;">This Works For</div>
+      <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+        <span style="font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--white); background: var(--panel); border: 1px solid var(--border); padding: 8px 18px; letter-spacing: 0.08em;">// MORTGAGE LENDERS</span>
+        <span style="font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--white); background: var(--panel); border: 1px solid var(--border); padding: 8px 18px; letter-spacing: 0.08em;">// TITLE COMPANIES</span>
+        <span style="font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--white); background: var(--panel); border: 1px solid var(--border); padding: 8px 18px; letter-spacing: 0.08em;">// ESCROW OFFICERS</span>
+        <span style="font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--white); background: var(--panel); border: 1px solid var(--border); padding: 8px 18px; letter-spacing: 0.08em;">// BROKERAGE OWNERS</span>
+        <span style="font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--white); background: var(--panel); border: 1px solid var(--border); padding: 8px 18px; letter-spacing: 0.08em;">// TEAM LEADERS</span>
+        <span style="font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--white); background: var(--panel); border: 1px solid var(--border); padding: 8px 18px; letter-spacing: 0.08em;">// HOME INSPECTORS</span>
+        <span style="font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--white); background: var(--panel); border: 1px solid var(--border); padding: 8px 18px; letter-spacing: 0.08em;">// REAL ESTATE ATTORNEYS</span>
+        <span style="font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--white); background: var(--panel); border: 1px solid var(--border); padding: 8px 18px; letter-spacing: 0.08em;">// ANY B2B SERVING AGENTS</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- THE DEAL -->
+<section id="book-now">
+  <div class="section-inner">
+    <div class="section-label fade-up" style="justify-content: center;">The Offer</div>
+    <h2 class="section-title fade-up fade-up-delay-1" style="text-align: center;">THIS IS WHAT<br>YOU GET FOR <span class="accent">FREE.</span></h2>
+    <div class="deal-box fade-up fade-up-delay-2">
+      <div class="deal-label">Your Investment</div>
+      <div class="deal-price">$0</div>
+      <div style="font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--muted); letter-spacing: 0.1em; margin: 8px 0 28px;">ZERO. NONE. NOT A DIME.</div>
+      <p class="deal-text">Connor runs the entire show. You get <strong>full credit</strong>. Your agents get <strong>real value</strong>. And you get a room full of people who now associate <strong>your name</strong> with something that actually helped them.</p>
+      <div class="deal-includes">
+        <span class="deal-tag">// Full Presentation</span>
+        <span class="deal-tag">// Live Q&A</span>
+        <span class="deal-tag">// Your Branding On Everything</span>
+        <span class="deal-tag">// Social Media Promotion</span>
+        <span class="deal-tag">// Use Your Zoom Or Connor's</span>
+        <span class="deal-tag">// Always Current — 24hr News Cycle</span>
+        <span class="deal-tag">// Customized To Your Audience</span>
+        <span class="deal-tag">// Attendee List Stays With You</span>
+      </div>
+      <div style="margin-top: 8px; margin-bottom: 24px;">
+        <div style="font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 0.1em; color: var(--gold); margin-bottom: 6px;">OR CALL DIRECT — 661-400-1720</div>
+        <div style="font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.12em; margin-bottom: 28px;">PICK A TIME BELOW — CONNOR WILL BE READY</div>
+        <div style="background: var(--black); border: 1px solid var(--border); padding: 8px; text-align: left;">
+          <iframe src="https://site.honorelevate.com/widget/booking/N85vNofLnLyyAThfgrUm" style="width: 100%; border: none; overflow: hidden; min-height: 680px;" scrolling="no" id="N85vNofLnLyyAThfgrUm_1772915206288"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://site.honorelevate.com/js/form_embed.js" type="text/javascript"></script>
+
+<!-- CTA -->
+<div class="cta-section">
+  <div class="cta-inner">
+    <h2 class="fade-up">STOP BEING THE REP<br>THEY <span class="accent">TOLERATE.</span><br>BECOME THE ONE<br>THEY <span style="color: var(--gold);">CALL FIRST.</span></h2>
+    <p class="fade-up fade-up-delay-1">One conversation with Connor. No commitment. No contract. Just a straight talk about whether this makes sense for your business and your agent database.</p>
+    <a href="tel:6614001720" class="cta-phone fade-up fade-up-delay-2">661-400-1720</a>
+    <a href="/cdn-cgi/l/email-protection#4c2f232222233e0c242322233e2920293a2d3829622f2321" class="cta-email fade-up fade-up-delay-3"><span class="__cf_email__" data-cfemail="abc8c4c5c5c4d9ebc3c4c5c4d9cec7ceddcadfce85c8c4c6">[email&#160;protected]</span></a>
+    <div class="fade-up fade-up-delay-4">
+      <a href="tel:6614001720" class="btn-primary" style="font-size: 17px; padding: 18px 44px; margin-right: 12px;">Call Now — It's Free</a>
+      <a href="https://www.ConnorWithHonor.com" target="_blank" class="btn-secondary" style="display: inline-block; margin-top: 12px;">ConnorWithHonor.com</a>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-left">
+    CONNOR MACIVOR · CA DRE #01238257 · SANTA CLARITA, CA · 661-400-1720
+  </div>
+  <div class="footer-right">
+    Coded by Connor with Honor | AI Growth Architect · <a href="https://www.honorelevate.com" target="_blank">HonorElevate.com</a>
+  </div>
+</footer>
+
+<script>
+  // Progressive enhancement — content visible by default, animate if supported
+  const allFadeEls = document.querySelectorAll('.fade-up');
+  allFadeEls.forEach(el => el.classList.add('animate'));
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(el => { if (el.isIntersecting) el.target.classList.add('visible'); });
+  }, { threshold: 0.08 });
+
+  allFadeEls.forEach(el => observer.observe(el));
+
+  // Hero fires immediately without waiting for scroll
+  document.querySelectorAll('.hero .fade-up').forEach((el, i) => {
+    setTimeout(() => el.classList.add('visible'), i * 120);
+  });
+
+  // ROLE BUTTON STYLES
+  const roleStyle = document.createElement('style');
+  roleStyle.textContent = `
+    .role-btn { background: var(--panel); border: 1px solid var(--border); color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 16px; cursor: pointer; transition: all 0.2s; }
+    .role-btn:hover { border-color: var(--red); color: var(--white); }
+    .active-role { background: var(--red); border-color: var(--red); color: var(--white); box-shadow: 0 0 12px var(--red-glow); }
+    .q-option { background: var(--panel); border: 1px solid var(--border); color: var(--text); font-family: 'Barlow', sans-serif; font-size: 16px; padding: 14px 20px; text-align: left; cursor: pointer; transition: all 0.2s; width: 100%; }
+    .q-option:hover { border-color: var(--cyan); color: var(--white); background: var(--cyan-dim); }
+    .q-option.selected { border-color: var(--cyan); background: var(--cyan-dim); color: var(--white); }
+  `;
+  document.head.appendChild(roleStyle);
+
+  // REFERRAL GAP CALCULATOR
+  let currentRole = 'lender';
+  const roleInsights = {
+    lender: "For lenders: one training session that makes 5 more agents think of you at the closing table closes this gap faster than any rate sheet ever will.",
+    title: "For title reps: agents choose their preferred title company based on relationship, not price. One training event shifts that relationship permanently.",
+    escrow: "For escrow officers: the agents who feel supported and educated by you are the ones who call you first — every time, on every deal.",
+    broker: "For brokers and team leaders: agents who feel invested in stay longer. Training builds loyalty that retention bonuses alone cannot buy."
+  };
+  const revenueLabels = {
+    lender: "// YOUR REVENUE PER TRANSACTION ($)",
+    title: "// YOUR FEE PER TRANSACTION ($)",
+    escrow: "// YOUR FEE PER TRANSACTION ($)",
+    broker: "// AVG GCI PER TRANSACTION ($)"
+  };
+  function setRole(role, btn) {
+    currentRole = role;
+    document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active-role'));
+    btn.classList.add('active-role');
+    document.getElementById('revenueLabel').textContent = revenueLabels[role];
+    calcGap();
+  }
+  function fmt(n) { return '$' + Math.round(n).toLocaleString(); }
+  function calcGap() {
+    const agents  = parseInt(document.getElementById('agentCount').value);
+    const tx      = parseInt(document.getElementById('txPerAgent').value);
+    const revenue = parseInt(document.getElementById('revenuePerTx').value);
+    const loyalty = parseInt(document.getElementById('loyaltyPct').value) / 100;
+    document.getElementById('agentCountVal').textContent   = agents;
+    document.getElementById('txPerAgentVal').textContent   = tx;
+    document.getElementById('revenuePerTxVal').textContent = revenue.toLocaleString();
+    document.getElementById('loyaltyPctVal').textContent   = Math.round(loyalty * 100);
+    const current       = agents * tx * revenue * loyalty;
+    const improved      = agents * tx * revenue * Math.min(loyalty + 0.20, 1);
+    const gap           = improved - current;
+    const fullPotential = agents * tx * revenue;
+    document.getElementById('currentRevenue').textContent  = fmt(current);
+    document.getElementById('improvedRevenue').textContent = fmt(improved);
+    document.getElementById('gapRevenue').textContent      = fmt(gap);
+    document.getElementById('fullPotential').textContent   = fmt(fullPotential);
+    document.getElementById('roleInsight').textContent     = roleInsights[currentRole];
+  }
+  calcGap();
+
+  // AI READINESS SCORE QUIZ
+  const questions = [
+    { category: "// DAILY USAGE", text: "How often do you currently use any AI tool in your real estate business?",
+      options: [{text:"Never — I have not started yet",score:0},{text:"Occasionally — maybe once a month",score:1},{text:"A few times a week for basic tasks",score:2},{text:"Daily — it is part of my workflow",score:3}] },
+    { category: "// LEAD FOLLOW-UP", text: "How do you handle lead follow-up when you are busy or unavailable?",
+      options: [{text:"I get to it when I can — sometimes they slip",score:0},{text:"I have a virtual assistant help occasionally",score:1},{text:"I use a CRM with some automation",score:2},{text:"I have an AI system that responds 24/7",score:3}] },
+    { category: "// CONTENT CREATION", text: "How do you create listing descriptions, social posts, and client emails?",
+      options: [{text:"I write them myself every time — it takes hours",score:0},{text:"I use templates I wrote a while ago",score:1},{text:"I use AI to draft and I edit from there",score:2},{text:"AI writes, I review — takes me under 5 minutes",score:3}] },
+    { category: "// MARKET KNOWLEDGE", text: "How do you stay current on AI news and tools that affect your business?",
+      options: [{text:"I don't — I hear things from other agents",score:0},{text:"I read articles occasionally when something big happens",score:1},{text:"I follow a few sources and try to stay informed",score:2},{text:"I track it daily — it is a competitive advantage",score:3}] },
+    { category: "// FUTURE READINESS", text: "If AI made half your current workflow obsolete in 18 months, how prepared are you?",
+      options: [{text:"Not at all — I would be starting from scratch",score:0},{text:"Somewhat — I would figure it out eventually",score:1},{text:"Pretty good — I am already building new skills",score:2},{text:"Ready — my business is designed to adapt fast",score:3}] }
+  ];
+  const scoreResults = [
+    {min:0,  max:3,  color:'var(--red)',  label:'AT RISK',       desc:"Your business is running on habits that AI is already disrupting. The good news: awareness is step one, and you just took it. The training Connor provides was built specifically for where you are right now."},
+    {min:4,  max:7,  color:'var(--gold)', label:'CATCHING UP',   desc:"You know AI matters and you have started exploring — but it is not yet woven into your daily operation. One solid training session with clear steps could move you forward faster than months of trial and error."},
+    {min:8,  max:11, color:'var(--cyan)', label:'ADVANCING',     desc:"You are ahead of most agents in your market. AI is part of your workflow. The next level is systematizing it — turning individual tools into a full business operating system that works while you sleep."},
+    {min:12, max:15, color:'var(--cyan)', label:'EARLY ADOPTER', desc:"You are already operating at a level most agents won't reach for two years. Your competitive advantage is real. The question now is how you keep your team or network at your level — and stay ahead of what is coming next."}
+  ];
+  let currentQ = 0, scores = [];
+  function renderQuestion() {
+    const q = questions[currentQ];
+    document.getElementById('qCategory').textContent = q.category;
+    document.getElementById('qText').textContent = q.text;
+    document.getElementById('qNum').textContent = currentQ + 1;
+    document.getElementById('quizProgress').style.width = ((currentQ + 1) / 5 * 100) + '%';
+    const optContainer = document.getElementById('qOptions');
+    optContainer.innerHTML = '';
+    q.options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'q-option';
+      btn.textContent = opt.text;
+      btn.onclick = () => selectAnswer(opt.score, btn);
+      optContainer.appendChild(btn);
+    });
+  }
+  function selectAnswer(score, btn) {
+    document.querySelectorAll('.q-option').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    scores[currentQ] = score;
+    setTimeout(() => { currentQ++; currentQ < questions.length ? renderQuestion() : showResult(); }, 300);
+  }
+  function showResult() {
+    const total = scores.reduce((a,b) => a+b, 0);
+    const result = scoreResults.find(r => total >= r.min && total <= r.max);
+    document.getElementById('questionArea').style.display = 'none';
+    document.getElementById('quizResult').style.display = 'block';
+    document.getElementById('quizProgress').style.width = '100%';
+    const scoreEl = document.getElementById('scoreNumber');
+    scoreEl.textContent = total + '/15';
+    scoreEl.style.color = result.color;
+    scoreEl.style.textShadow = '0 0 40px ' + result.color;
+    const labelEl = document.getElementById('scoreLabel');
+    labelEl.textContent = result.label;
+    labelEl.style.color = result.color;
+    document.getElementById('scoreDesc').textContent = result.desc;
+  }
+  function resetQuiz() {
+    currentQ = 0; scores = [];
+    document.getElementById('questionArea').style.display = 'block';
+    document.getElementById('quizResult').style.display = 'none';
+    renderQuestion();
+  }
+  renderQuestion();
+</script>
+</body>
+</html>
